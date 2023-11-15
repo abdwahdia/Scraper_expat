@@ -60,33 +60,41 @@ add_bg_from_local('img_file2.jpg')
 def load_vehicle_data(mul_page):
     df = pd.DataFrame()
     for p in range(1, int(mul_page)):
-        Url = f"https://www.expat-dakar.com/voitures/dakar?page={p}" 
+        Url =  f"https://www.expat-dakar.com/vehicules?page={p}"
         res = get(Url)
         soup = BeautifulSoup(res.text, 'html.parser')
-        containers = soup.find_all('div', class_ ='listings-cards__list-item')
+        containers = soup.find_all('a', class_ ='listing-card__inner')
+        links =  []
+        for container in containers:
+            links.append(container['href'])
         data = []
-        for container in containers : 
-            try :
-                Gen = container.find('div', class_ ='listing-card__header__tags').find_all('span')
-                Label = Gen[0].text
-                Brand= Gen[1].text 
-                Year = Gen[2].text
-                Gearbox = Gen[3].text
-                Adress = container.find('div', class_ = 'listing-card__header__location').text.replace('\n', '')
-                Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
-                Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
-                obj = {
-                    'Label': Label,
-                    'Brand': Brand, 
-                    'Year': int(Year), # convertir en Integer
-                    'Gearbox': Gearbox, 
-                    'Adress': Adress,
-                    'Price': int(Price),
-                    'Imagelink': Imagelink 
-                }
-                data.append(obj)
-            except:
-                pass
+        for link in links:
+          res = get(link)
+          soup = BeautifulSoup(res.text, 'html.parser')
+          try :
+              Marque  = soup.find_all('dd', class_ = 'listing-item__properties__description')[0].text.strip()
+              Modele = soup.find_all('dd', class_ = 'listing-item__properties__description')[1].text.strip()
+              Etat = soup.find_all('dd', class_ = 'listing-item__properties__description')[2].text.strip()
+              Transmission = soup.find_all('dd', class_ = 'listing-item__properties__description')[3].text.strip()
+              Annee = soup.find_all('dd', class_ = 'listing-item__properties__description')[4].text.strip()
+              Kilometrage = soup.find_all('dd', class_ = 'listing-item__properties__description')[5].text.strip().replace(' km', '').replace(',', '')
+              Adresse = soup.find('span', class_ = 'listing-item__address-location').text.strip()
+              Prix = soup.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
+              Lien_image = soup.find('div', class_ = 'gallery__image__inner').img['src']
+
+              obj = {       'Marque': Marque,
+                            'Modele': Modele,
+                            'Etat': Etat,
+                            'Transmission': Transmission,
+                            'Annee': int(Annee),
+                            'Kilometrage': int(Kilometrage),
+                            'Adresse': Adresse,
+                            'Prix': int(Prix),
+                            'Lien_image': Lien_image
+                        }
+              data.append(obj)
+          except:
+              pass
         DF = pd.DataFrame(data)
         df = pd.concat([df, DF], axis = 0)
     df.reset_index(drop = True, inplace = True)
@@ -95,31 +103,37 @@ def load_vehicle_data(mul_page):
 def load_motocycle_data(mul_page):
     df = pd.DataFrame()
     for p in range(1, int(mul_page)):
-        Url = f"https://www.expat-dakar.com/motos-scooters?sdc_search_offer_id=krmhqaiyuc&page={p}" 
+        Url =  f"https://www.expat-dakar.com/motos-scooters?page={p}"
         res = get(Url)
         soup = BeautifulSoup(res.text, 'html.parser')
-        containers = soup.find_all('div', class_ ='listings-cards__list-item')
+        containers = soup.find_all('a', class_ ='listing-card__inner')
+        links =  []
+        for container in containers:
+            links.append(container['href'])
         data = []
-        for container in containers : 
-            try :
-                Gen = container.find('div', class_ ='listing-card__header__tags').find_all('span')
-                Type_Motos = Gen[0].text
-                Brand= Gen[1].text 
-                Year = Gen[2].text
-                Adress = container.find('div', class_ = 'listing-card__header__location').text.replace('\n', '')
-                Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
-                Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
-                obj = {
-                        'Type_Motos': Type_Motos,
-                        'Brand': Brand, 
-                        'Year': int(Year), 
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
-                    }
-                data.append(obj)
-            except:
-               pass
+        for link in links:
+          res = get(link)
+          soup = BeautifulSoup(res.text, 'html.parser')
+          try :
+              Marque  = soup.find_all('dd', class_ = 'listing-item__properties__description')[0].text.strip()
+              Etat = soup.find_all('dd', class_ = 'listing-item__properties__description')[1].text.strip()
+              Annee = soup.find_all('dd', class_ = 'listing-item__properties__description')[2].text.strip()
+              Kilometrage = soup.find_all('dd', class_ = 'listing-item__properties__description')[3].text.strip().replace(' km', '').replace(',', '')
+              Adresse = soup.find('span', class_ = 'listing-item__address-location').text.strip()
+              Prix = soup.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
+              Lien_image = soup.find('div', class_ = 'gallery__image__inner').img['src']
+
+              obj = {       'Marque': Marque,
+                            'Etat': Etat,
+                            'Annee': int(Annee),
+                            'Kilometrage': int(Kilometrage),
+                            'Adresse': Adresse,
+                            'Prix': int(Prix),
+                            'Lien_image': Lien_image
+                        }
+              data.append(obj)
+          except:
+              pass
         DF = pd.DataFrame(data)
         df = pd.concat([df, DF], axis = 0)
     df.reset_index(drop = True, inplace = True)
@@ -128,31 +142,37 @@ def load_motocycle_data(mul_page):
 def load_apartment_data(mul_page):
     df = pd.DataFrame()
     for p in range(1, int(mul_page)):
-        Url = f"https://www.expat-dakar.com/appartements-a-louer?page={p}" 
+        Url =  f"https://www.expat-dakar.com/appartements-a-louer?page={p}"
         res = get(Url)
         soup = BeautifulSoup(res.text, 'html.parser')
-        containers = soup.find_all('div', class_ ='listings-cards__list-item')
+        containers = soup.find_all('a', class_ ='listing-card__inner')
+        links =  []
+        for container in containers:
+            links.append(container['href'])
         data = []
-        for container in containers: 
-            try :
-                Type = container.find('div', class_ = 'listing-card__header__title').text.strip().split(' ')[0]
-                Num_Room_Area = container.find('div', class_ = 'listing-card__header__tags').text.split('chambre')
-                Number_Room = Num_Room_Area[0]
-                Area_square_meter = Num_Room_Area[1].replace(' m²', '')
-                Adress = container.find('div', class_ = 'listing-card__header__location').text.replace('\n', '')
-                Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
-                Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
-                obj = {
-                        'Type': Type,
-                        'Number_Room': int(Number_Room), 
-                        'Area_square_meter': int(Area_square_meter),
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
-                    }
-                data.append(obj)
-            except:
-               pass
+        for link in links:
+          res = get(link)
+          soup = BeautifulSoup(res.text, 'html.parser')
+          try :
+              Type  = soup.find('h1', class_ = 'listing-item__header').text.strip()
+              Nomb_cham = soup.find_all('dd', class_ = 'listing-item__properties__description')[0].text.strip()
+              Nomb_Sall_Bain = soup.find_all('dd', class_ = 'listing-item__properties__description')[1].text.strip()
+              Superficie = soup.find_all('dd', class_ = 'listing-item__properties__description')[2].text.replace(' m²', '')
+              Adresse = soup.find('span', class_ = 'listing-item__address-location').text.strip()
+              Prix = soup.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
+              Lien_image = soup.find('div', class_ = 'gallery__image__inner').img['src']
+
+              obj = {       'Type': Type,
+                            'Nomb_cham': int(Nomb_cham),
+                            'Nomb_Sall_Bain': int(Nomb_Sall_Bain),
+                            'Superficie': int(Superficie),
+                            'Adresse': Adresse,
+                            'Prix': int(Prix),
+                            'Lien_image': Lien_image
+                        }
+              data.append(obj)
+          except:
+              pass
         DF = pd.DataFrame(data)
         df = pd.concat([df, DF], axis = 0)
     df.reset_index(drop = True, inplace = True)
@@ -177,11 +197,11 @@ def load_furnished_apartment_data(mul_page):
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
                         'Type': Type,
-                        'Number_Room': int(Number_Room), 
-                        'Area_square_meter': int(Area_square_meter),
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Nomb_cham': int(Number_Room), 
+                        'Superficie': int(Area_square_meter),
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -209,10 +229,10 @@ def load_land_data(mul_page):
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
                         'Details': Details,
-                        'Area_square_meter': int(Area_square_meter),
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Superficie': int(Area_square_meter),
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -240,10 +260,10 @@ def load_house_data(mul_page):
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
                         'Details': Details,
-                        'Area_square_meter': int(Area_square_meter),
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Superficie': int(Area_square_meter),
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -269,9 +289,9 @@ def load_car_rental_data(mul_page):
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
                         'Details': Details,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -296,10 +316,10 @@ def load_equipment_pieces_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
-                        'Tool_name': Tool_name,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Nom_outil': Tool_name,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -325,11 +345,11 @@ def load_laptop_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
-                        'Type_of_laptop': Type_of_laptop,
-                        'Brand': Brand,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_Ordi': Type_of_laptop,
+                        'Marque': Brand,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -355,11 +375,11 @@ def load_phone_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
-                        'Type_of_phone': Type_of_phone,
-                        'Brand': Brand,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_Portable': Type_of_phone,
+                        'Marque': Brand,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -386,10 +406,10 @@ def load_accessories_multimedia_data(mul_page):
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = {
                         'Details':Details,             
-                        'Type_of_tool': Type_of_tool,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_Outil': Type_of_tool,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -417,11 +437,11 @@ def load_tv_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = { 'Details': Details,
-                        'Type_of_TV': Type_of_TV,
-                        'Brand': Brand,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_TV': Type_of_TV,
+                        'Marque': Brand,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -448,10 +468,10 @@ def load_vid_gam_consol_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = { 'Details': Details,
-                        'Type_of_GameCon': Type_of_GameCon,                    
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_GameCon': Type_of_GameCon,                    
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -478,11 +498,11 @@ def load_tablet_data(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = { 'Details': Details,
-                        'Type_of_Tablet': Type_of_Tablet,
-                        'Brand': Brand,
-                        'Adress': Adress,
-                        'Price': int(Price),
-                        'Imagelink': Imagelink
+                        'Type__Tablet': Type_of_Tablet,
+                        'Marque': Brand,
+                        'Adresse': Adress,
+                        'Prix': int(Price),
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -510,11 +530,11 @@ def load_aud_vid_equipment(mul_page):
                 Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                 Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                 obj = { 'Details': Details,
-                        'Type_of_tool': Type_of_tool,
-                        'Brand': Brand,
-                        'Adress': Adress,
-                        'Price': int(Price), 
-                        'Imagelink': Imagelink
+                        'Type_Outil': Type_of_tool,
+                        'Marque': Brand,
+                        'Adresse': Adress,
+                        'Prix': int(Price), 
+                        'Lien_image': Imagelink
                     }
                 data.append(obj)
             except:
@@ -540,10 +560,10 @@ def load_printer_scanners_data(mul_page):
                     Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                     Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                     obj = { 'Details': Details,
-                            'Type_of_tool': Type_of_tool,
-                            'Adress': Adress,
-                            'Price': int(Price), 
-                            'Imagelink': Imagelink
+                            'Type_Outil': Type_of_tool,
+                            'Adresse': Adress,
+                            'Prix': int(Price), 
+                            'Lien_image': Imagelink
                         }
                     data.append(obj)
             except:
@@ -570,11 +590,11 @@ def load_camera_data(mul_page):
                     Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                     Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                     obj = { 'Details': Details,
-                            'Type_of_tool': Type_of_tool,
-                            'Brand': Brand,
-                            'Adress': Adress,
-                            'Price': int(Price), 
-                            'Imagelink': Imagelink
+                            'Type_Outil': Type_of_tool,
+                            'Marque': Brand,
+                            'Adresse': Adress,
+                            'Prix': int(Price), 
+                            'Lien_image': Imagelink
                         }
                     data.append(obj)
             except:
@@ -600,10 +620,10 @@ def load_electromenager_data(mul_page):
                     Price = container.find('span', class_ = 'listing-card__price__value 1').text.replace('\n', '').replace('\u202f', '').replace(' F Cfa', '')
                     Imagelink = container.find('div', class_ = 'listing-card__image__inner').img['src']
                     obj = { 'Details': Details,
-                            'Type_of_tool': Type_of_tool,
-                            'Adress': Adress,
-                            'Price': int(Price), 
-                            'Imagelink': Imagelink
+                            'Type_Outil': Type_of_tool,
+                            'Adresse': Adress,
+                            'Prix': int(Price), 
+                            'Lien_image': Imagelink
                         }
                     data.append(obj)
             except:
@@ -690,13 +710,3 @@ load(load_aud_vid_equipment_mul_pag, 'Audio-videos equipment data', '15', '118')
 load(load_printer_scanners_data_mul_pag, 'Printer-scanners data','16', '113')
 load(load_camera_data_mul_pag, 'Camera data', '17', '108')
 load(load_electromenager_data_mul_pag, 'Electromenager data', '18', '112')
-
-
-
-
-
-
-
- 
-
-
